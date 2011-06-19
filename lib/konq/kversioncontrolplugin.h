@@ -184,6 +184,14 @@ public:
     // TODO: make const-correct for future versions where binary compatibility may get broken
     virtual QList<QAction*> contextMenuActions(const QString& directory) = 0;
 
+    /**
+     * Returns the list of actions that shuld be shown in context menu for a directory \p
+     * directory which may or may not be version controlled. Helpful for commands like 
+     * creating/cloning a new repository.
+     */
+    // Not purely virtual to ensure compatibility with existing plugins.
+    virtual QList<QAction*> universalContextMenuActions(const QString& directory);
+
 signals:
     /**
      * Should be emitted when the version state of files might have been changed

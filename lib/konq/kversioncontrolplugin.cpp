@@ -27,4 +27,9 @@ KVersionControlPlugin::~KVersionControlPlugin()
 {
 }
 
+QList<QAction*> KVersionControlPlugin::universalContextMenuActions(const QString& directory)
+{
+    return QList<QAction*>();
+}
+
 #include "kversioncontrolplugin.moc"

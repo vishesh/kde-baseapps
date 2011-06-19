@@ -108,12 +108,23 @@ QList<QAction*> VersionControlObserver::contextMenuActions(const KFileItemList& 
     return actions;
 }
 
-QList<QAction*> VersionControlObserver::contextMenuActions(const QString& directory) const
+QList<QAction*> VersionControlObserver::contextMenuActions(const QString& directory) 
 {
     QList<QAction*> actions;
+    QString fileName;
     if (isVersioned() && m_updateItemStatesThread->lockPlugin()) {
-        actions = m_plugin->contextMenuActions(directory);
+        actions.append(m_plugin->universalContextMenuActions(directory));
+        actions.append(m_plugin->contextMenuActions(directory));
+        fileName = m_plugin->fileName();
         m_updateItemStatesThread->unlockPlugin();
+    }
+    
+    QMutableHashIterator<QString, QList<QAction*> > it(m_universalContextMenuActions);
+    while (it.hasNext()) {
+        it.next();
+        if (it.key() != fileName) {
+            actions.append(it.value());
+        }
     }
 
     return actions;
@@ -263,7 +274,7 @@ void VersionControlObserver::addDirectory(const QModelIndex& parentIndex, QList<
     }
 }
 
-KVersionControlPlugin* VersionControlObserver::searchPlugin(const KUrl& directory) const
+KVersionControlPlugin* VersionControlObserver::searchPlugin(const KUrl& directory) 
 {
     static bool pluginsAvailable = true;
     static QList<KVersionControlPlugin*> plugins;
@@ -278,6 +289,7 @@ KVersionControlPlugin* VersionControlObserver::searchPlugin(const KUrl& director
         // No searching for plugins has been done yet. Query the KServiceTypeTrader for
         // all fileview version control plugins and remember them in 'plugins'.
         const QStringList enabledPlugins = VersionControlSettings::enabledPlugins();
+        //m_universalContextMenuActions.clear();
 
         const KService::List pluginServices = KServiceTypeTrader::self()->query("FileViewVersionControlPlugin");
         for (KService::List::ConstIterator it = pluginServices.constBegin(); it != pluginServices.constEnd(); ++it) {
@@ -285,6 +297,9 @@ KVersionControlPlugin* VersionControlObserver::searchPlugin(const KUrl& director
                 KVersionControlPlugin* plugin = (*it)->createInstance<KVersionControlPlugin>();
                 if (plugin) {
                     plugins.append(plugin);
+                    m_universalContextMenuActions.insert(
+                        plugin->fileName(),
+                        plugin->universalContextMenuActions(directory.url()));
                 }
             }
         }

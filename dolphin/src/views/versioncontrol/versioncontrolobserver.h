@@ -25,6 +25,7 @@
 #include <KFileItem>
 #include <kversioncontrolplugin.h>
 #include <QList>
+#include <QHash>
 #include <QMutex>
 #include <QObject>
 #include <QPersistentModelIndex>
@@ -55,7 +56,7 @@ public:
     virtual ~VersionControlObserver();
 
     QList<QAction*> contextMenuActions(const KFileItemList& items) const;
-    QList<QAction*> contextMenuActions(const QString& directory) const;
+    QList<QAction*> contextMenuActions(const QString& directory);
 
 signals:
     /**
@@ -120,7 +121,7 @@ private:
      * Returns a matching plugin for the given directory.
      * 0 is returned, if no matching plugin has been found.
      */
-    KVersionControlPlugin* searchPlugin(const KUrl& directory) const;
+    KVersionControlPlugin* searchPlugin(const KUrl& directory) ;
 
     /**
      * Returns true, if the directory contains a version control information.
@@ -141,6 +142,7 @@ private:
 
     KVersionControlPlugin* m_plugin;
     UpdateItemStatesThread* m_updateItemStatesThread;
+    QHash<QString, QList<QAction*> > m_universalContextMenuActions; 
 
     friend class UpdateItemStatesThread;
 };
